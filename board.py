@@ -101,6 +101,9 @@ class Board:
 
         """
 
+        OKBLUE = '\033[31m'
+        RESET = '\033[0m'
+
         for i in range(self.size):
             line = []
             for j in range(self.size):
@@ -119,7 +122,14 @@ class Board:
                 self.grid[car.var_coord + car.length - 1][car.fix_coord] = 'v'
             if car.is_goal:
                 self.__exit_info = (car.fix_coord, car.orientation)
-
+                # add colour
+                if car.orientation == 'h':
+                    self.grid[car.fix_coord][car.var_coord] = '<'
+                    self.grid[car.fix_coord][car.var_coord + car.length - 1] = '>'
+                elif car.orientation == 'v':
+                    self.grid[car.var_coord][car.fix_coord] = '^'
+                    self.grid[car.var_coord + car.length - 1][car.fix_coord] = 'v'
+        
     def display(self):
         """
         Prints out the board in a human readable format.
