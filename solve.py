@@ -1,4 +1,5 @@
 from board import *
+from heapq import *
 import numpy as np # for debugging
 
 def a_star(init_board, hfn):
@@ -18,7 +19,28 @@ def a_star(init_board, hfn):
     :rtype: List[State], int
     """
 
-    raise NotImplementedError
+    print(f"Running {hfn.__name__}")
+
+    root_state = State(init_board, zero_heuristic, 0, 0)
+
+    frontier = [root_state]
+    explored = set()
+
+    while len(frontier) > 0:
+        cur_state = frontier.pop()
+        if cur_state.board in explored:
+            continue
+        else:
+            explored.add(cur_state.board)
+        if is_goal(cur_state):
+            path = get_path(cur_state)
+            print(f"Found goal state at depth: {cur_state.depth}")
+            return path, cur_state.depth
+        successors = get_successors(cur_state)
+        for s in successors:
+            frontier.append(s)
+        frontier = sorted(frontier, key=lambda x: (-1 * hfn(x.board), -1 * x.id))
+
 
 
 def dfs(init_board):
@@ -38,14 +60,33 @@ def dfs(init_board):
 
     # ALSO HANDLE PRUNING 
 
+    print("Running DFS")
+
+    root_state = State(init_board, zero_heuristic, 0, 0)
+
+    frontier = [root_state]
+    explored = set()
+
+    while len(frontier) > 0:
+        cur_state = frontier.pop()
+        if cur_state.board in explored:
+            continue
+        else:
+            explored.add(cur_state.board)
+        if is_goal(cur_state):
+            path = get_path(cur_state)
+            print(f"Found goal state at depth: {cur_state.depth}")
+            return path, cur_state.depth
+        successors = sorted(get_successors(cur_state), key=lambda x: -1 * x.id)
+        for s in successors:
+            frontier.append(s)
+
     # frontier = [init_board state]
     # while (frontier not empty)
         # select newest elem and remove path <n0...nk> from f
         # if goal(nk): return <n0...nk>
         # for every successor n of nk:
             # add <n0...nk, n> to f
-
-    raise NotImplementedError
 
 
 def get_successors(state):
@@ -220,8 +261,6 @@ def is_goal(state):
     for car in cars:
         if car.is_goal:
             if car.var_coord == 4:
-                state.board.display()
-                print("I am a goal state!")
                 return True
 
     return False
@@ -238,7 +277,16 @@ def get_path(state):
     :rtype: List[State]
     """
 
-    raise NotImplementedError
+    states = [state]
+
+    while state.parent is not None:
+        states.append(state.parent)
+        state = state.parent
+
+
+    states.reverse()
+
+    return states
 
 
 def blocking_heuristic(board):
@@ -255,13 +303,38 @@ def blocking_heuristic(board):
     :return: The heuristic value.
     :rtype: int
     """
+    state = State(board, zero_heuristic, 0, 0, None)
 
-    raise NotImplementedError
+    if is_goal(state): return 0
+
+    count = 1
+
+    cars = board.cars
+    right = 0
+    row = 0
+
+    for car in cars:
+        if car.is_goal:
+            right = car.var_coord + car.length - 1
+            row = car.fix_coord
+            break
+
+    for car in cars:
+        if not car.is_goal:
+            if car.orientation == 'v' and car.fix_coord > right:
+                if (car.var_coord == row or (car.var_coord < row and car.var_coord + car.length - 1 >= row)):
+                    count += 1
+
+    # print(f"Heuristic count: {count}")
+
+    return count
 
 
 def advanced_heuristic(board):
     """
     An advanced heuristic of your own choosing and invention.
+
+    calculate how much each car needs to move to get our car to a goal state
 
     :param board: The current board.
     :type board: Board
@@ -269,4 +342,33 @@ def advanced_heuristic(board):
     :rtype: int
     """
 
-    raise NotImplementedError
+    state = State(board, zero_heuristic, 0, 0, None)
+
+    if is_goal(state): return 0
+
+    count = 1
+
+    cars = board.cars
+    right = 0
+    row = 0
+
+    for car in cars:
+        if car.is_goal:
+            right = car.var_coord + car.length - 1
+            row = car.fix_coord
+            break
+
+    for car in cars:
+        if car.orientation == 'v' and car.fix_coord > right:
+            if car.length == 2 and (car.var_coord == row or car.var_coord == row-1):
+                count += 1
+            if car.length == 3 and car.var_coord == row:
+                count += 1
+            elif car.length == 3 and car.var_coord == row - 1:
+                count += 2
+            elif car.length == 3 and car.var_coord == 0:
+                count += 3
+
+    # print(f"Advanced heuristic count: {count}")
+
+    return count

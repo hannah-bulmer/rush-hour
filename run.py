@@ -6,13 +6,16 @@ def main():
 
     states = []
     for board in boards:
+        # board.display()
+        # blocking_heuristic(board)
+        # advanced_heuristic(board)
         states.append(State(board, zero_heuristic, 0, 0, None))
 
-    states[0].board.display()
-    successors = get_successors(states[0])
-
-    for s in successors:
-        s.board.display()
+    num = 10
+    dfs(states[num].board)
+    a_star(states[num].board, zero_heuristic)
+    a_star(states[num].board, blocking_heuristic)
+    a_star(states[num].board, advanced_heuristic)
 
 if __name__ == "__main__":
     main()
