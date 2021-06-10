@@ -2,6 +2,13 @@ from board import *
 from heapq import *
 import numpy as np # for debugging
 
+def customLt(self, other):
+    if self.f != other.f:
+        return self.f < other.f
+    elif self.id != other.id:
+        return self.id < other.id
+    return self.parent.id < other.parent.id
+
 def a_star(init_board, hfn):
     """
     Run the A_star search algorithm given an initial board and a heuristic function.
@@ -19,27 +26,32 @@ def a_star(init_board, hfn):
     :rtype: List[State], int
     """
 
-    print(f"Running {hfn.__name__}")
+    # print(f"Running {hfn.__name__}")
 
-    root_state = State(init_board, zero_heuristic, 0, 0)
+    State.__lt__ = customLt
 
-    frontier = [root_state]
+    root_state = State(init_board, hfn, hfn(init_board), 0)
+
+    frontier = []
+    heappush(frontier, root_state)
     explored = set()
+    nodes_expanded = 0
 
     while len(frontier) > 0:
-        cur_state = frontier.pop()
+        cur_state = heappop(frontier)
         if cur_state.board in explored:
             continue
-        else:
-            explored.add(cur_state.board)
+        # print(nodes_expanded, f"Cost: {cur_state.f}")
+        nodes_expanded += 1
+        explored.add(cur_state.board)
         if is_goal(cur_state):
             path = get_path(cur_state)
-            print(f"Found goal state at depth: {cur_state.depth}")
-            return path, cur_state.depth
+            print(f"{hfn.__name__}: {nodes_expanded}")
+            # print(f"Found goal state at depth: {cur_state.depth}\n\t> Nodes expanded: {nodes_expanded}")
+            return path, cur_state.depth, nodes_expanded
         successors = get_successors(cur_state)
         for s in successors:
-            frontier.append(s)
-        frontier = sorted(frontier, key=lambda x: (-1 * hfn(x.board), -1 * x.id))
+            heappush(frontier, s)
 
 
 
@@ -62,6 +74,7 @@ def dfs(init_board):
 
     print("Running DFS")
 
+
     root_state = State(init_board, zero_heuristic, 0, 0)
 
     frontier = [root_state]
@@ -71,8 +84,7 @@ def dfs(init_board):
         cur_state = frontier.pop()
         if cur_state.board in explored:
             continue
-        else:
-            explored.add(cur_state.board)
+        explored.add(cur_state.board)
         if is_goal(cur_state):
             path = get_path(cur_state)
             print(f"Found goal state at depth: {cur_state.depth}")
@@ -81,12 +93,6 @@ def dfs(init_board):
         for s in successors:
             frontier.append(s)
 
-    # frontier = [init_board state]
-    # while (frontier not empty)
-        # select newest elem and remove path <n0...nk> from f
-        # if goal(nk): return <n0...nk>
-        # for every successor n of nk:
-            # add <n0...nk, n> to f
 
 
 def get_successors(state):
@@ -140,6 +146,7 @@ def slide_vertical(car, other_cars, grid, state):
     for indx, row in enumerate(grid):
         if row[car.fix_coord] != '.' and indx > car.var_coord + car.length - 1:
             limit_bottom = indx
+            break
 
     # print(f"Top lim: {limit_top}, bottom lim: {limit_bottom}")
 
@@ -176,7 +183,7 @@ def slide_vertical(car, other_cars, grid, state):
         
         board = Board(state.board.name,state.board.size,other_cars + [Car(car.fix_coord,row_i,car.orientation, car.length, car.is_goal)])
 
-        new_state = State(board, state.hfn, state.f, state.depth + 1, state)
+        new_state = State(board, state.hfn, state.hfn(board) + state.depth + 1, state.depth + 1, state)
 
         # new_state.board.display()
 
@@ -201,6 +208,7 @@ def slide_horizontal(car, other_cars, grid, state):
     for indx, col in enumerate(grid[car.fix_coord]):
         if col != '.' and indx > car.var_coord + car.length - 1:
             limit_right = indx
+            break
 
     # print(f"Left lim: {limit_left}, right lim: {limit_right}")
 
@@ -237,7 +245,8 @@ def slide_horizontal(car, other_cars, grid, state):
         
         board = Board(state.board.name,state.board.size,other_cars + [Car(row_i,car.fix_coord,car.orientation, car.length, car.is_goal)])
 
-        new_state = State(board, state.hfn, state.f, state.depth + 1, state)
+
+        new_state = State(board, state.hfn, state.hfn(board) + state.depth + 1, state.depth + 1, state)
 
         # new_state.board.display()
 
@@ -334,7 +343,8 @@ def advanced_heuristic(board):
     """
     An advanced heuristic of your own choosing and invention.
 
-    calculate how much each car needs to move to get our car to a goal state
+    calculate how many cars are blocking goal car
+    for each of those cars that is blocked, add 1
 
     :param board: The current board.
     :type board: Board
@@ -352,6 +362,11 @@ def advanced_heuristic(board):
     right = 0
     row = 0
 
+    horizontal = ['<','>','-']
+    vertical = ['^','v','|']
+
+    blocking_cars = []
+
     for car in cars:
         if car.is_goal:
             right = car.var_coord + car.length - 1
@@ -359,16 +374,50 @@ def advanced_heuristic(board):
             break
 
     for car in cars:
-        if car.orientation == 'v' and car.fix_coord > right:
-            if car.length == 2 and (car.var_coord == row or car.var_coord == row-1):
+        if not car.is_goal:
+            if car.orientation == 'v' and car.fix_coord > right:
+                if (car.var_coord == row or (car.var_coord < row and car.var_coord + car.length - 1 >= row)):
+                    count += 1
+                    blocking_cars.append(car)
+
+    for car in blocking_cars:
+        i = 0
+        j = 0
+        
+        # touching bottom or bottom is a vert car, look at top
+        if (car.var_coord+car.length == board.size or board.grid[car.var_coord+car.length][car.fix_coord] in vertical):
+            while(car.var_coord - i - 1 >= 0 and board.grid[car.var_coord - 1-i][car.fix_coord] != '.'):
                 count += 1
-            if car.length == 3 and car.var_coord == row:
+                i += 1
+        # touching top or top is a vert car, look down
+        elif (car.var_coord == 0 or board.grid[car.var_coord - 1][car.fix_coord] in vertical):
+            i = 0
+            while(car.var_coord+car.length+i < board.size and board.grid[car.var_coord+car.length+i][car.fix_coord] != '.'):
                 count += 1
-            elif car.length == 3 and car.var_coord == row - 1:
-                count += 2
-            elif car.length == 3 and car.var_coord == 0:
-                count += 3
+                i += 1
+        else:
+            i = 0
+            j = 0
+            while (car.var_coord+car.length+i < board.size and board.grid[car.var_coord+car.length+i][car.fix_coord] != '.') and (car.var_coord - j - 1 >= 0 and board.grid[car.var_coord - 1-j][car.fix_coord] != '.'):
+                count += 1
+                i += 1
+                j += 1
 
     # print(f"Advanced heuristic count: {count}")
 
     return count
+
+    """
+    i = 0
+        j = 0
+        # blocked = False
+        # look below car
+        while (car.var_coord+car.length+i < board.size or car.var_coord - j - 1 >= 0):
+            if (car.var_coord+car.length+i < board.size and board.grid[car.var_coord+car.length+i][car.fix_coord] != '.'):
+                if (car.var_coord - j - 1 >= 0 and board.grid[car.var_coord - 1-j][car.fix_coord] != '.'):
+                    count += 1
+                    i += 1
+                    j += 1
+                else: break
+            else:break  
+    """

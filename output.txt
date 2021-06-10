@@ -1,0 +1,120 @@
+0
+blocking_heuristic: 674
+advanced_heuristic: 616
+1
+blocking_heuristic: 404
+advanced_heuristic: 313
+2
+blocking_heuristic: 456
+advanced_heuristic: 430
+3
+blocking_heuristic: 140
+advanced_heuristic: 80
+4
+blocking_heuristic: 611
+advanced_heuristic: 207
+5
+blocking_heuristic: 565
+advanced_heuristic: 360
+6
+blocking_heuristic: 1939
+advanced_heuristic: 1836
+7
+blocking_heuristic: 831
+advanced_heuristic: 507
+8
+blocking_heuristic: 336
+advanced_heuristic: 277
+9
+blocking_heuristic: 1486
+advanced_heuristic: 1406
+10
+blocking_heuristic: 656
+advanced_heuristic: 650
+11
+blocking_heuristic: 598
+advanced_heuristic: 498
+12
+blocking_heuristic: 3829
+advanced_heuristic: 3303
+13
+blocking_heuristic: 3534
+advanced_heuristic: 2917
+14
+blocking_heuristic: 518
+advanced_heuristic: 508
+15
+blocking_heuristic: 1889
+advanced_heuristic: 1753
+16
+blocking_heuristic: 1808
+advanced_heuristic: 1806
+17
+blocking_heuristic: 1352
+advanced_heuristic: 972
+18
+blocking_heuristic: 465
+advanced_heuristic: 453
+19
+blocking_heuristic: 345
+advanced_heuristic: 180
+20
+blocking_heuristic: 242
+advanced_heuristic: 224
+21
+blocking_heuristic: 2490
+advanced_heuristic: 2050
+22
+blocking_heuristic: 1340
+advanced_heuristic: 1143
+23
+blocking_heuristic: 3997
+advanced_heuristic: 3823
+24
+blocking_heuristic: 6588
+advanced_heuristic: 5952
+25
+blocking_heuristic: 3928
+advanced_heuristic: 3730
+26
+blocking_heuristic: 2218
+advanced_heuristic: 2033
+27
+blocking_heuristic: 1293
+advanced_heuristic: 1064
+28
+blocking_heuristic: 4237
+advanced_heuristic: 4126
+29
+blocking_heuristic: 1028
+advanced_heuristic: 933
+30
+blocking_heuristic: 3682
+advanced_heuristic: 3603
+31
+blocking_heuristic: 501
+advanced_heuristic: 483
+32
+blocking_heuristic: 2566
+advanced_heuristic: 2255
+33
+blocking_heuristic: 4103
+advanced_heuristic: 3997
+34
+blocking_heuristic: 3818
+advanced_heuristic: 3786
+35
+blocking_heuristic: 2061
+advanced_heuristic: 1915
+36
+blocking_heuristic: 1863
+advanced_heuristic: 1733
+37
+blocking_heuristic: 3048
+advanced_heuristic: 2989
+38
+blocking_heuristic: 3502
+advanced_heuristic: 3454
+39
+blocking_heuristic: 2578
+advanced_heuristic: 2160
